@@ -3,6 +3,8 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 
@@ -12,9 +14,14 @@ mongoose.connection.once('open',()=>{
 	console.log('connected to database');
 });
 
-const productRoutes = require('./app/routes/product');
+const productRoutes = require('./routes/product');
 
-app.use(morgan('dev'));
+const accessLogStream = fs.createWriteStream(
+	path.join('./', 'logs', 'access.log'),{ flags: 'a' }
+);
+
+app.use(morgan('combined', { stream: accessLogStream }))
+
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
